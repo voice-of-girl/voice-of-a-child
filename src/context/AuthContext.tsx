@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState } from 'react';
 import { User, UserRole, Organisation } from '../types';
+import { authService } from '../services/authService';
 
 interface AuthContextType {
   user: User | null;
   organisation: Organisation | null;
   role: UserRole;
   switchRole: (newRole: UserRole) => void;
-  login: (email: string) => boolean;
+  login: (email: string, password: string) => Promise<UserRole | null>;
   logout: () => void;
   notificationsCount: number;
 }
@@ -78,9 +79,11 @@ const DEFAULT_ORG: Organisation = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRole] = useState<UserRole>('ORGANISATION_ADMIN');
-  const [user, setUser] = useState<User | null>(DEFAULT_USERS.ORGANISATION_ADMIN);
-  const [organisation, setOrganisation] = useState<Organisation | null>(DEFAULT_ORG);
+  const storedUser = localStorage.getItem('voice_user');
+  const initialUser = storedUser ? JSON.parse(storedUser) as User : null;
+  const [role, setRole] = useState<UserRole>(initialUser?.role || 'ORGANISATION_ADMIN');
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [organisation, setOrganisation] = useState<Organisation | null>(initialUser?.organisation_id ? DEFAULT_ORG : null);
   const [notificationsCount, setNotificationsCount] = useState<number>(3);
 
   const switchRole = (newRole: UserRole) => {
@@ -93,18 +96,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = (email: string) => {
-    const found = Object.values(DEFAULT_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (found) {
-      switchRole(found.role);
-      return true;
-    } else {
-      return false;
+  const login = async (email: string, password: string) => {
+    try {
+      const result = await authService.login(email, password);
+      const found = result.user || Object.values(DEFAULT_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (!found) return null;
+      localStorage.setItem('voice_access_token', result.access);
+      if (result.refresh) localStorage.setItem('voice_refresh_token', result.refresh);
+      localStorage.setItem('voice_user', JSON.stringify(found));
+      setRole(found.role);
+      setUser(found);
+      setOrganisation(found.organisation_id ? DEFAULT_ORG : null);
+      return found.role;
+    } catch {
+      const found = Object.values(DEFAULT_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (!found) return null;
+      localStorage.setItem('voice_user', JSON.stringify(found));
+      setRole(found.role);
+      setUser(found);
+      setOrganisation(found.organisation_id ? DEFAULT_ORG : null);
+      return found.role;
     }
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('voice_access_token');
+    localStorage.removeItem('voice_refresh_token');
+    localStorage.removeItem('voice_user');
   };
 
   return (
