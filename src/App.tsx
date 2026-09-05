@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { LandingPage } from './components/LandingPage';
 import { OrgDashboard } from './components/org/OrgDashboard';
-import { BeneficiaryDashboard } from './components/beneficiary/BeneficiaryDashboard';
 import { FieldOfficerDashboard } from './components/field/FieldOfficerDashboard';
 import { PlatformAdminDashboard } from './components/platform/PlatformAdminDashboard';
 
@@ -16,22 +15,20 @@ const MainAppContent: React.FC = () => {
   const { role } = useAuth();
   const [showLanding, setShowLanding] = useState<boolean>(false);
 
-  if (showLanding) {
+  if (showLanding || role === 'BENEFICIARY') {
     return (
       <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
-        <Header showLanding={showLanding} setShowLanding={setShowLanding} />
         <LandingPage onEnterApp={() => setShowLanding(false)} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9FAFB] text-slate-900 font-sans">
+    <div className="app-shell min-h-screen flex flex-col bg-[#F9FAFB] text-slate-900 font-sans">
       <Header showLanding={showLanding} setShowLanding={setShowLanding} />
       
-      <main className="flex-1">
+      <main className="app-main flex-1">
         {role === 'ORGANISATION_ADMIN' && <OrgDashboard />}
-        {role === 'BENEFICIARY' && <BeneficiaryDashboard />}
         {role === 'FIELD_OFFICER' && <FieldOfficerDashboard />}
         {role === 'PLATFORM_ADMIN' && <PlatformAdminDashboard />}
       </main>

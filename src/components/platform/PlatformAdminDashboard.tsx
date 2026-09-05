@@ -21,6 +21,7 @@ export const PlatformAdminDashboard: React.FC = () => {
   const [organisations, setOrganisations] = useState<Organisation[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [loading, setLoading] = useState(false);
+  const [interestSubmissions, setInterestSubmissions] = useState<any[]>([]);
 
   const loadOrgs = async () => {
     try {
@@ -33,6 +34,7 @@ export const PlatformAdminDashboard: React.FC = () => {
 
   useEffect(() => {
     loadOrgs();
+    api.getBeneficiaryInterests().then(setInterestSubmissions).catch(() => setInterestSubmissions([]));
   }, []);
 
   const handleVerify = async (orgId: string, status: string) => {
@@ -126,7 +128,13 @@ export const PlatformAdminDashboard: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
+          {filteredOrgs.length === 0 ? (
+            <div className="p-10 text-center border border-dashed border-slate-300 rounded-lg">
+              <Building2 className="w-9 h-9 mx-auto text-slate-300" />
+              <h3 className="mt-3 text-sm font-bold text-slate-800">No organisations match this filter</h3>
+              <p className="mt-1 text-xs text-slate-500">Try another verification status or check back when a partner submits registration.</p>
+            </div>
+          ) : <table className="w-full text-left text-xs text-slate-700">
             <thead className="bg-slate-50 text-slate-500 font-semibold border-y border-slate-200">
               <tr>
                 <th className="py-3 px-3">Organisation Name</th>
@@ -187,8 +195,44 @@ export const PlatformAdminDashboard: React.FC = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table>}
         </div>
+      </div>
+
+      {/* Public applicant intake */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">New opportunity enquiries</h2>
+            <p className="text-xs text-slate-500">Public submissions awaiting review before a managed profile is created.</p>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold">{interestSubmissions.length} New</span>
+        </div>
+        {interestSubmissions.length === 0 ? (
+          <div className="py-8 text-center border border-dashed border-slate-300 rounded-lg">
+            <Users className="w-8 h-8 mx-auto text-slate-300" />
+            <p className="mt-2 text-xs text-slate-500">No new public enquiries yet.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-700">
+              <thead className="bg-slate-50 text-slate-500 font-semibold border-y border-slate-200">
+                <tr><th className="py-2.5 px-3">Applicant</th><th className="py-2.5 px-3">Contact</th><th className="py-2.5 px-3">Location</th><th className="py-2.5 px-3">Interest</th><th className="py-2.5 px-3">Received</th></tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {interestSubmissions.map((submission) => (
+                  <tr key={submission.id} className="hover:bg-slate-50/70">
+                    <td className="py-3 px-3"><div className="font-semibold text-slate-900">{submission.first_name} {submission.last_name}</div><div className="text-[11px] text-slate-500">{submission.education_level}</div></td>
+                    <td className="py-3 px-3"><div>{submission.email}</div><div className="text-[11px] text-slate-400">{submission.phone_number}</div></td>
+                    <td className="py-3 px-3">{submission.district}</td>
+                    <td className="py-3 px-3">{submission.interest_area}</td>
+                    <td className="py-3 px-3 text-slate-500">{new Date(submission.submitted_at).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

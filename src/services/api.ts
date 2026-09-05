@@ -12,6 +12,22 @@ import {
 } from '../types';
 
 export const api = {
+  submitBeneficiaryInterest: async (data: any) => {
+    const res = await fetch('/api/public/beneficiary-interest/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Unable to submit interest form');
+    return res.json();
+  },
+
+  getBeneficiaryInterests: async () => {
+    const res = await fetch('/api/public/beneficiary-interest/');
+    if (!res.ok) throw new Error('Unable to load beneficiary interest submissions');
+    return res.json();
+  },
+
   // Programmes
   getProgrammes: async (): Promise<Programme[]> => {
     const res = await fetch('/api/programmes/');

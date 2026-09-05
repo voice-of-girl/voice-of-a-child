@@ -122,7 +122,17 @@ export const OrgProgrammes: React.FC<OrgProgrammesProps> = ({
 
       {/* Programme Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {programmes.map((p) => {
+        {programmes.length === 0 ? (
+          <div className="md:col-span-2 bg-white p-12 rounded-xl border border-dashed border-slate-300 text-center">
+            <FolderPlus className="w-9 h-9 mx-auto text-slate-300" />
+            <h3 className="mt-3 text-base font-bold text-slate-800">No programmes have been set up</h3>
+            <p className="mt-1 text-sm text-slate-500">Create a new cohort or register an existing intervention to begin managing participants and outcomes.</p>
+            <div className="mt-5 flex justify-center gap-2">
+              <button onClick={() => setShowCreateModal('EXISTING')} className="px-3.5 py-2 rounded-md border border-slate-200 text-slate-700 text-xs font-medium cursor-pointer">Register existing</button>
+              <button onClick={() => setShowCreateModal('NEW')} className="px-3.5 py-2 rounded-md bg-slate-900 text-white text-xs font-medium cursor-pointer">Create new programme</button>
+            </div>
+          </div>
+        ) : programmes.map((p) => {
           const isSelected = p.id === activeProgrammeId;
           return (
             <div
