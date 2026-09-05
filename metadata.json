@@ -1,0 +1,6 @@
+{
+  "name": "Voice of a Girl",
+  "description": "B2B SaaS platform for beneficiary management, programme monitoring, custom forms data collection, and outcome measurement for organisations empowering girls and young women.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
