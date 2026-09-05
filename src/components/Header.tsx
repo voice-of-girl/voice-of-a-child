@@ -13,6 +13,11 @@ import {
   CheckCircle2,
   ChevronDown,
   LogOut
+  , LayoutDashboard
+  , Layers3
+  , UsersRound
+  , BarChart3
+  , Settings2
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -53,9 +58,23 @@ export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) =
   };
 
   const CurrentIcon = roleConfig[role].icon;
+  const managedRoles: UserRole[] = ['ORGANISATION_ADMIN', 'FIELD_OFFICER', 'PLATFORM_ADMIN'];
+  const workspaceItems = role === 'ORGANISATION_ADMIN'
+    ? [
+        { label: 'Overview', icon: LayoutDashboard },
+        { label: 'Programmes', icon: Layers3 },
+        { label: 'Participants', icon: UsersRound },
+        { label: 'Impact & reports', icon: BarChart3 },
+      ]
+      : [
+          { label: 'Workspace overview', icon: LayoutDashboard },
+          { label: 'Verification queue', icon: ClipboardCheck },
+          { label: 'Reports', icon: BarChart3 },
+          { label: 'Settings', icon: Settings2 },
+        ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200" id="app-header">
+    <header className="app-header sticky top-0 z-40 bg-white border-b border-slate-200" id="app-header">
       {/* Top Banner: Value Chain Quick Pipeline */}
       <div className="bg-slate-900 text-slate-200 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 font-medium overflow-x-auto py-0.5">
@@ -111,6 +130,24 @@ export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) =
           </div>
         </div>
 
+        <nav className="workspace-nav" aria-label="Workspace sections">
+          <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Workspace</p>
+          <div className="mt-3 space-y-1">
+            {workspaceItems.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.label}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${index === 0 ? 'bg-blue-50 text-blue-700' : 'text-slate-500'}`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </nav>
+
         {/* Right Section: Persona Role Switcher & User Details */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Quick Role Switcher Dropdown */}
@@ -134,7 +171,7 @@ export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) =
                 <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
                   Switch Active Role Persona
                 </div>
-                {(Object.keys(roleConfig) as UserRole[]).map((r) => {
+                {managedRoles.map((r) => {
                   const Icon = roleConfig[r].icon;
                   const isSelected = role === r;
                   return (

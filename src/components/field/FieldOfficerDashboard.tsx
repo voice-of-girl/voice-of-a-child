@@ -35,6 +35,7 @@ export const FieldOfficerDashboard: React.FC = () => {
 
   // Attendance state
   const [attendanceRecords, setAttendanceRecords] = useState<Record<string, boolean>>({});
+  const [attendanceSaved, setAttendanceSaved] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -169,7 +170,13 @@ export const FieldOfficerDashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {tasks.map((task) => (
+            {tasks.length === 0 ? (
+              <div className="md:col-span-2 bg-white p-10 rounded-xl border border-dashed border-slate-300 text-center">
+                <ClipboardCheck className="w-9 h-9 mx-auto text-slate-300" />
+                <h3 className="mt-3 text-sm font-bold text-slate-800">Your verification queue is clear</h3>
+                <p className="mt-1 text-xs text-slate-500">New field visits will appear here when programme coordinators assign them.</p>
+              </div>
+            ) : tasks.map((task) => (
               <div key={task.id} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -185,7 +192,7 @@ export const FieldOfficerDashboard: React.FC = () => {
                   <h3 className="font-bold text-slate-900 text-base">{task.beneficiary_name}</h3>
                   <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
                     <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{task.location}</span>
+                    <span>{task.beneficiary_location}</span>
                   </div>
 
                   {/* Verification items */}
@@ -204,9 +211,9 @@ export const FieldOfficerDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  {task.notes && (
+                  {task.field_notes && (
                     <div className="mt-2 text-xs text-slate-600 italic">
-                      Note: "{task.notes}"
+                      Note: "{task.field_notes}"
                     </div>
                   )}
                 </div>
@@ -240,15 +247,29 @@ export const FieldOfficerDashboard: React.FC = () => {
               <p className="text-xs text-slate-500">Tap participant to toggle present/absent for today's technical workshop.</p>
             </div>
             <button
-              onClick={() => alert('Attendance successfully committed to programme monitoring engine!')}
+              onClick={() => {
+                setAttendanceSaved(true);
+                setTimeout(() => setAttendanceSaved(false), 4000);
+              }}
               className="px-3.5 py-2 bg-slate-900 text-white text-xs font-medium rounded-md hover:bg-slate-800 transition-colors cursor-pointer shadow-sm"
             >
               Save Attendance Record
             </button>
           </div>
 
+          {attendanceSaved && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-lg flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Attendance successfully saved to the programme monitoring record.
+            </div>
+          )}
+
           <div className="space-y-2">
-            {participants.map((p) => {
+            {participants.length === 0 ? (
+              <div className="p-8 rounded-xl border border-dashed border-slate-300 text-center">
+                <UserCheck className="w-8 h-8 mx-auto text-slate-300" />
+                <p className="mt-2 text-xs text-slate-500">No participants are assigned to this attendance roster yet.</p>
+              </div>
+            ) : participants.map((p) => {
               const isPresent = attendanceRecords[p.id] !== false;
               return (
                 <div

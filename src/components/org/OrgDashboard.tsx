@@ -165,18 +165,7 @@ export const OrgDashboard: React.FC = () => {
       </div>
 
       {/* Active Tab View Rendering */}
-      {activeProgramme ? (
-        <div>
-          {activeTab === 'overview' && (
-            <OrgOverview
-              programme={activeProgramme}
-              participants={participants}
-              challenges={challenges}
-              analytics={analytics}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
-          )}
-
+      <div>
           {activeTab === 'programmes' && (
             <OrgProgrammes
               programmes={programmes}
@@ -189,7 +178,17 @@ export const OrgDashboard: React.FC = () => {
             />
           )}
 
-          {activeTab === 'participants' && (
+          {activeTab !== 'programmes' && activeProgramme && activeTab === 'overview' && (
+            <OrgOverview
+              programme={activeProgramme}
+              participants={participants}
+              challenges={challenges}
+              analytics={analytics}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+          )}
+
+          {activeTab !== 'programmes' && activeProgramme && activeTab === 'participants' && (
             <OrgParticipants
               programmeId={selectedProgrammeId}
               participants={participants}
@@ -197,7 +196,7 @@ export const OrgDashboard: React.FC = () => {
             />
           )}
 
-          {activeTab === 'forms' && (
+          {activeTab !== 'programmes' && activeProgramme && activeTab === 'forms' && (
             <OrgFormBuilder
               forms={forms}
               programmeId={selectedProgrammeId}
@@ -205,7 +204,7 @@ export const OrgDashboard: React.FC = () => {
             />
           )}
 
-          {activeTab === 'monitoring' && (
+          {activeTab !== 'programmes' && activeProgramme && activeTab === 'monitoring' && (
             <OrgMonitoring
               programmeId={selectedProgrammeId}
               challenges={challenges}
@@ -213,19 +212,22 @@ export const OrgDashboard: React.FC = () => {
             />
           )}
 
-          {activeTab === 'impact' && (
+          {activeTab !== 'programmes' && activeProgramme && activeTab === 'impact' && (
             <OrgImpact programmeId={selectedProgrammeId} />
           )}
 
-          {activeTab === 'reports' && (
+          {activeTab !== 'programmes' && activeProgramme && activeTab === 'reports' && (
             <OrgReports programme={activeProgramme} />
           )}
-        </div>
-      ) : (
-        <div className="bg-white p-12 text-center rounded-xl border border-slate-200">
-          <p className="text-sm text-slate-500">No programmes found. Please create one to begin.</p>
-        </div>
-      )}
+          {activeTab !== 'programmes' && !activeProgramme && (
+            <div className="bg-white p-12 text-center rounded-xl border border-dashed border-slate-300">
+              <Target className="w-9 h-9 mx-auto text-slate-300" />
+              <h2 className="mt-3 text-base font-bold text-slate-800">Create your first programme</h2>
+              <p className="mt-1 text-sm text-slate-500">Set up a cohort before opening participants, forms, monitoring, or reports.</p>
+              <button onClick={() => setActiveTab('programmes')} className="mt-5 px-4 py-2 rounded-md bg-slate-900 text-white text-xs font-medium cursor-pointer">Open programme setup</button>
+            </div>
+          )}
+      </div>
     </div>
   );
 };

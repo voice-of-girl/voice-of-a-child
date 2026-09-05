@@ -211,7 +211,13 @@ export const OrgMonitoring: React.FC<OrgMonitoringProps> = ({ programmeId, chall
 
         {/* Challenges Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
+          {filtered.length === 0 ? (
+            <div className="p-10 text-center border border-dashed border-slate-300 rounded-lg">
+              <CheckCircle2 className="w-9 h-9 mx-auto text-slate-300" />
+              <h3 className="mt-3 text-sm font-bold text-slate-800">No challenges match these filters</h3>
+              <p className="mt-1 text-xs text-slate-500">Adjust the severity or status filters to see more of the response log.</p>
+            </div>
+          ) : <table className="w-full text-left text-xs text-slate-700">
             <thead className="bg-slate-50 text-slate-500 font-semibold border-y border-slate-200">
               <tr>
                 <th className="py-2.5 px-3 font-medium">Participant</th>
@@ -277,7 +283,7 @@ export const OrgMonitoring: React.FC<OrgMonitoringProps> = ({ programmeId, chall
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table>}
         </div>
       </div>
 
