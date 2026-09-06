@@ -59,6 +59,10 @@ class RegisterUserSerializer(serializers.ModelSerializer):
     organisation = serializers.PrimaryKeyRelatedField(
         queryset=Organisation.objects.none(), required=False, allow_null=True
     )
+    # Names are useful but not essential for provisioning; allow accounts to
+    # be created with just email + role + organisation (+ password).
+    first_name = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    last_name = serializers.CharField(required=False, allow_blank=True, max_length=150)
 
     class Meta:
         model = CustomUser
@@ -89,23 +93,19 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         requested_role = attrs.get("role", CustomUser.Role.STAFF)
         requested_org = attrs.get("organisation")
 
+        # Accounts are provisioned by the platform admin. Organisations never
+        # create their own users. This guard is defence in depth alongside the
+        # IsPlatformAdmin permission on every creation endpoint.
         if user.role != PLATFORM_ADMIN:
-            # Org admins may only create staff within their own organisation.
-            if requested_org is not None and requested_org.pk != user.organisation_id:
-                raise serializers.ValidationError(
-                    {"organisation": "You cannot create users in another organisation."}
-                )
-            if requested_role == PLATFORM_ADMIN:
-                raise serializers.ValidationError(
-                    {"role": "Only platform admins can create platform admins."}
-                )
-            attrs["organisation"] = user.organisation
-            if user.role == ORGANISATION_ADMIN:
-                allowed = {CustomUser.Role.PROGRAMME_MANAGER, CustomUser.Role.MONITORING_OFFICER, CustomUser.Role.STAFF}
-                if requested_role not in allowed:
-                    raise serializers.ValidationError(
-                        {"role": f"Organisation admins may only assign {sorted(r for r in allowed)} roles."}
-                    )
+            raise serializers.ValidationError(
+                {"detail": "Only the platform admin can create user accounts."}
+            )
+
+        # Every role except platform admin must be bound to a tenant.
+        if requested_role != PLATFORM_ADMIN and requested_org is None:
+            raise serializers.ValidationError(
+                {"organisation": "An organisation is required for this role."}
+            )
         return attrs
 
     def create(self, validated_data):

@@ -108,11 +108,42 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UserListView(generics.ListCreateAPIView):
-    serializer_class = UserSerializer
+    """
+    GET  /api/auth/users/ — list users (org-scoped; platform admin sees all).
+    POST /api/auth/users/ — platform admin only (organisations cannot create
+    their own users; the platform admin provisions every account).
+    """
+
     permission_classes = (permissions.IsAuthenticated,)
+
+    def get_serializer_class(self):
+        from .serializers import RegisterUserSerializer
+
+        if self.request.method == "POST":
+            return RegisterUserSerializer
+        return UserSerializer
+
+    def get_permissions(self):
+        from apps.core.permissions import IsPlatformAdmin
+
+        if self.request.method == "POST":
+            return [IsPlatformAdmin()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_platform_admin:
             return User.objects.all().select_related("organisation")
-        return User.objects.filter(organisation=user.organisation).select_related("organisation")
+        return User.objects.filter(organisation=user.organisation).select_related(
+            "organisation"
+        )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        audit(request.user, "user.create", f"created user {user.email}")
+        return Response(
+            UserSerializer(user, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )

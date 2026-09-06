@@ -30,8 +30,9 @@ class OrganisationViewSet(viewsets.ModelViewSet):
     serializer_class = OrganisationSerializer
 
     def get_permissions(self):
-        if self.action in ("create", "update", "partial_update", "destroy"):
-            return [IsOrgAdminOrPlatformAdmin()]
+        # Only the platform admin may create new tenants (organisations).
+        if self.action == "create":
+            return [IsPlatformAdmin()]
         return [IsOrgAdminOrPlatformAdmin()]
 
     def get_queryset(self):

@@ -130,6 +130,12 @@ def _create_organisations_and_users():
     )
 
     _make_user("platform_admin@voiceofagirl.org", "Elena", "Vance", CustomUser.Role.PLATFORM_ADMIN, None)
+    platform_user = CustomUser.objects.get(email="platform_admin@voiceofagirl.org")
+    # Allow platform admin to also reach the Django admin site if needed.
+    if not (platform_user.is_staff and platform_user.is_superuser):
+        platform_user.is_staff = True
+        platform_user.is_superuser = True
+        platform_user.save()
     _make_user("admin@voiceofagirl.org", "Dr. Amina", "Okonjo", CustomUser.Role.ORGANISATION_ADMIN, org1)
     _make_user("manager@voiceofagirl.org", "Sarah", "Kibuuka", CustomUser.Role.PROGRAMME_MANAGER, org1)
     _make_user("mne@voiceofagirl.org", "Grace", "Namulindwa", CustomUser.Role.MONITORING_OFFICER, org1)
