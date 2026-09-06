@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/Button";
+import { ErrorState, EmptyState } from "./ui/Indicators";
 
 export function PageHeader({
   title,
@@ -48,11 +49,9 @@ export function ApiState<T>({
       </div>
     );
   if (status === "error") {
-    const { ErrorState } = require("./ui/Indicators");
     return <ErrorState error={error || "Failed to load."} onRetry={onRetry} />;
   }
   if (empty) {
-    const { EmptyState } = require("./ui/Indicators");
     return <EmptyState title="Nothing here yet." description="No records match your filter." />;
   }
   return <>{children}</>;

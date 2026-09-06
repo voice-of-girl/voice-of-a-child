@@ -1,5 +1,6 @@
 """Authentication and account views."""
 from django.contrib.auth import get_user_model
+from django.db.models import Count
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -9,6 +10,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.core.permissions import IsPlatformAdmin
 from apps.core.services import audit
+from apps.organisations.models import Organisation
+from apps.participants.models import Participant
+from apps.programmes.models import Programme
+from apps.surveys.models import Survey, SurveyResponse
 
 from .serializers import (
     MeSerializer,
@@ -95,6 +100,109 @@ class PasswordChangeView(APIView):
         user.save(update_fields=["password"])
         audit(user, "password.change")
         return Response({"detail": "Password updated."})
+
+
+class DashboardView(APIView):
+    """GET /api/auth/dashboard/ — role-scoped dashboard summary."""
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        role = user.role
+        org = user.organisation
+
+        if role == CustomUser.Role.PLATFORM_ADMIN:
+            data = self._platform_admin_dashboard()
+        elif role == CustomUser.Role.ORGANISATION_ADMIN:
+            data = self._org_admin_dashboard(org)
+        elif role == CustomUser.Role.PROGRAMME_MANAGER:
+            data = self._programme_manager_dashboard(user, org)
+        elif role == CustomUser.Role.MONITORING_OFFICER:
+            data = self._monitoring_officer_dashboard(user, org)
+        else:
+            data = self._staff_dashboard(user, org)
+
+        data["role"] = role
+        data["role_display"] = user.get_role_display()
+        return Response(data)
+
+    def _platform_admin_dashboard(self):
+        return {
+            "total_organisations": Organisation.objects.count(),
+            "total_users": User.objects.count(),
+            "total_programmes": Programme.objects.count(),
+            "total_participants": Participant.objects.count(),
+            "total_surveys": Survey.objects.count(),
+            "total_responses": SurveyResponse.objects.count(),
+            "active_programmes": Programme.objects.filter(status=Programme.Status.ACTIVE).count(),
+            "active_organisations": Organisation.objects.filter(is_active=True).count(),
+        }
+
+    def _org_admin_dashboard(self, org):
+        if not org:
+            return {}
+        programmes = Programme.objects.filter(organisation=org)
+        participants = Participant.objects.filter(organisation=org)
+        surveys = Survey.objects.filter(organisation=org)
+        responses = SurveyResponse.objects.filter(organisation=org)
+        return {
+            "organisation_id": str(org.id),
+            "organisation_name": org.name,
+            "total_programmes": programmes.count(),
+            "active_programmes": programmes.filter(status=Programme.Status.ACTIVE).count(),
+            "total_participants": participants.count(),
+            "active_participants": participants.filter(status=Participant.Status.ACTIVE).count(),
+            "total_surveys": surveys.count(),
+            "published_surveys": surveys.filter(status=Survey.Status.PUBLISHED).count(),
+            "total_responses": responses.count(),
+        }
+
+    def _programme_manager_dashboard(self, user, org):
+        if not org:
+            return {}
+        programmes = Programme.objects.filter(organisation=org)
+        participants = Participant.objects.filter(organisation=org)
+        return {
+            "organisation_id": str(org.id),
+            "total_programmes": programmes.count(),
+            "active_programmes": programmes.filter(status=Programme.Status.ACTIVE).count(),
+            "total_participants": participants.count(),
+            "recent_programmes": list(
+                programmes.order_by("-created_at")[:5].values("id", "name", "status", "start_date")
+            ),
+        }
+
+    def _monitoring_officer_dashboard(self, user, org):
+        if not org:
+            return {}
+        surveys = Survey.objects.filter(organisation=org)
+        responses = SurveyResponse.objects.filter(organisation=org)
+        return {
+            "organisation_id": str(org.id),
+            "total_surveys": surveys.count(),
+            "published_surveys": surveys.filter(status=Survey.Status.PUBLISHED).count(),
+            "total_responses": responses.count(),
+            "recent_responses": list(
+                responses.order_by("-submitted_at")[:5].values(
+                    "id", "survey__title", "respondent_name", "submitted_at"
+                )
+            ),
+        }
+
+    def _staff_dashboard(self, user, org):
+        if not org:
+            return {}
+        surveys = Survey.objects.filter(created_by=user, organisation=org)
+        responses = SurveyResponse.objects.filter(organisation=org)
+        return {
+            "organisation_id": str(org.id),
+            "my_surveys": surveys.count(),
+            "total_responses": responses.count(),
+            "recent_surveys": list(
+                surveys.order_by("-created_at")[:5].values("id", "title", "status", "created_at")
+            ),
+        }
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):

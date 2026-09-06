@@ -49,10 +49,13 @@ INSTALLED_APPS = [
     "apps.monitoring",
     "apps.impact",
     "apps.reports",
+    "apps.impact_projects",
+    "apps.ussd",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -129,6 +132,13 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# WhiteNoise serves collected static files in production (Render).
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -203,3 +213,10 @@ X_FRAME_OPTIONS = "DENY"
 PUBLIC_SURVEY_BASE_URL = os.getenv("PUBLIC_SURVEY_BASE_URL", "http://localhost:5173")
 # Report storage location (overridable for object storage abstractions later).
 REPORT_STORAGE_ROOT = BASE_DIR / "media" / "reports"
+
+# USSD / Africa's Talking
+AFRICASTALKING_USERNAME = os.getenv("AFRICASTALKING_USERNAME", "")
+AFRICASTALKING_API_KEY = os.getenv("AFRICASTALKING_API_KEY", "")
+AFRICASTALKING_USSD_SERVICE_CODE = os.getenv("AFRICASTALKING_USSD_SERVICE_CODE", "")
+AFRICASTALKING_USSD_CALLBACK_URL = os.getenv("AFRICASTALKING_USSD_CALLBACK_URL", "")
+USSD_MAX_CALLS_PER_MINUTE = int(os.getenv("USSD_MAX_CALLS_PER_MINUTE", "30"))

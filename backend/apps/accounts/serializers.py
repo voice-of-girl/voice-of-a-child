@@ -34,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class MeSerializer(serializers.ModelSerializer):
     organisation = OrganisationBriefSerializer(read_only=True)
+    dashboard_url = serializers.CharField(read_only=True)
 
     class Meta:
         model = CustomUser
@@ -48,6 +49,7 @@ class MeSerializer(serializers.ModelSerializer):
             "organisation",
             "is_active",
             "created_at",
+            "dashboard_url",
         ]
 
 

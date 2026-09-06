@@ -73,6 +73,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def is_platform_admin(self):
         return self.role == self.Role.PLATFORM_ADMIN
 
+    @property
+    def dashboard_url(self):
+        return f"/api/auth/dashboard/"
+
     def organisations_visible(self):
         """
         Organisations this user may act upon.
