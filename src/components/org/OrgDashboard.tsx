@@ -23,11 +23,11 @@ import {
   Sparkles
 } from 'lucide-react';
 
-export const OrgDashboard: React.FC = () => {
+export const OrgDashboard: React.FC<{ initialTab?: string }> = ({ initialTab = 'overview' }) => {
   const { organisation } = useAuth();
   const [programmes, setProgrammes] = useState<Programme[]>([]);
   const [selectedProgrammeId, setSelectedProgrammeId] = useState<string>('prog_1');
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
 
   // Programme state
   const [participants, setParticipants] = useState<BeneficiaryParticipation[]>([]);
