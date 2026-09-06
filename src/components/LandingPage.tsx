@@ -114,8 +114,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
               </div>
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-xl">
                 <img
-                  src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=85"
-                  alt="Black Ugandan girls in a rural classroom"
+                  src="https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=1200&q=85"
+                  alt="Black African girls in a rural classroom"
                   className="h-72 w-full object-cover sm:h-80"
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent p-5 pt-16 text-white">
