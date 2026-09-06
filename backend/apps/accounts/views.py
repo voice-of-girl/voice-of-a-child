@@ -169,3 +169,35 @@ class PasswordResetView(viewsets.ViewSet):
 
 class RefreshView(TokenRefreshView):
     """Overrides config.urls reference for clarity (SimpleJWT defaults retained)."""
+
+
+class BootstrapSuperuserView(viewsets.ViewSet):
+    """One-time endpoint to create the first superuser when no shell is available."""
+
+    permission_classes = [AllowAny]
+
+    def create(self, request):
+        if User.objects.filter(is_superuser=True).exists():
+            return Response(
+                {"detail": "A superuser already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        email = request.data.get("email", "").lower()
+        password = request.data.get("password", "")
+        first_name = request.data.get("first_name", "")
+        last_name = request.data.get("last_name", "")
+        if not email or not password or not first_name or not last_name:
+            return Response(
+                {"detail": "email, password, first_name and last_name are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user = User.objects.create_superuser(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        return Response(
+            {"detail": "Superuser created.", "email": user.email},
+            status=status.HTTP_201_CREATED,
+        )
