@@ -183,7 +183,16 @@ export const OrgFormBuilder: React.FC<OrgFormBuilderProps> = ({ forms, programme
       {/* Main Grid: Form List & Active Form / Editor */}
       {!isEditing ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {forms.map((f) => {
+          {forms.length === 0 ? (
+            <div className="md:col-span-2 lg:col-span-4 bg-white p-10 rounded-xl border border-dashed border-slate-300 text-center">
+              <FileText className="w-9 h-9 mx-auto text-slate-300" />
+              <h3 className="mt-3 text-sm font-bold text-slate-800">No forms in this programme</h3>
+              <p className="mt-1 text-xs text-slate-500">Create an intake or monitoring survey to start collecting participant data.</p>
+              <button onClick={startNewForm} className="mt-4 px-3.5 py-2 rounded-md bg-slate-900 text-white text-xs font-medium cursor-pointer">
+                <Plus className="w-3.5 h-3.5 inline mr-1" /> Create the first form
+              </button>
+            </div>
+          ) : forms.map((f) => {
             const isSelected = selectedForm?.id === f.id;
             return (
               <div

@@ -1,1 +1,273 @@
 @import "tailwindcss";
+
+@theme {
+	--font-display: Georgia, "Times New Roman", serif;
+	--font-body: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+	--color-paper: #f8fafc;
+	--color-paper-deep: #eef4fb;
+	--color-ink: #102a43;
+	--color-ink-soft: #627d98;
+	--color-line: #d9e2ec;
+	--color-blue: #2563eb;
+	--color-blue-deep: #1e40af;
+}
+
+:root {
+	--paper: #f8fafc;
+	--paper-deep: #eef4fb;
+	--ink: #102a43;
+	--ink-soft: #627d98;
+	--line: #d9e2ec;
+	--blue: #2563eb;
+	--blue-deep: #1e40af;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--font-body);
+	-webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+	font-family: var(--font-display);
+	letter-spacing: 0;
+}
+
+button, select, input, textarea {
+	font: inherit;
+}
+
+button, a {
+	transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+:focus-visible {
+	outline: 2px solid var(--blue);
+	outline-offset: 2px;
+}
+
+/* Shared workspace shell inspired by the reference dashboard. */
+.app-shell {
+	background: var(--paper);
+}
+
+.app-shell .app-main {
+	min-width: 0;
+	margin-left: 252px;
+	background: var(--paper);
+}
+
+.app-shell #app-header {
+	position: fixed;
+	inset: 0 auto 0 0;
+	width: 252px;
+	height: 100vh;
+	border-right: 1px solid var(--line);
+	border-bottom: 0;
+	overflow-y: auto;
+	background: #ffffff;
+}
+
+.app-shell #app-header > div:last-child {
+	max-width: none;
+	height: 100%;
+	padding: 28px 20px 22px;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: flex-start;
+	gap: 30px;
+}
+
+.app-shell #app-header > div:first-child {
+	display: none;
+}
+
+.app-shell #app-header .flex.items-center.gap-3.cursor-pointer {
+	padding: 0 4px;
+}
+
+.app-shell #app-header .flex.items-center.gap-3.cursor-pointer > div:first-child {
+	width: 38px;
+	height: 38px;
+	border-radius: 12px;
+	background: var(--blue);
+	box-shadow: 0 8px 16px rgb(37 99 235 / 18%);
+}
+
+.app-shell #app-header .flex.items-center.gap-3.cursor-pointer span:first-child {
+	color: var(--ink);
+	font-family: var(--font-display);
+	font-size: 1.12rem;
+}
+
+.app-shell #app-header .flex.items-center.gap-3.cursor-pointer p {
+	color: var(--ink-soft);
+}
+
+.app-shell #app-header > div:last-child > div:last-child {
+	width: 100%;
+	margin-top: auto;
+	padding-top: 18px;
+	border-top: 1px solid var(--line);
+}
+
+.app-shell #app-header .bg-indigo-600 {
+	background: var(--blue);
+}
+
+.app-shell #app-header .bg-slate-900 {
+	background: var(--ink);
+}
+
+.app-shell #app-header .text-indigo-600,
+.app-shell #app-header .text-indigo-700 {
+	color: var(--blue-deep);
+}
+
+.app-shell #app-header .bg-indigo-50 {
+	background: #eaf1ff;
+}
+
+.app-shell #app-header .border-indigo-200,
+.app-shell #app-header .border-indigo-100 {
+	border-color: #c7d7fe;
+}
+
+.workspace-nav {
+	display: block;
+}
+
+.workspace-nav .bg-blue-50 {
+	background: #eaf1ff;
+}
+
+.workspace-nav .text-blue-700 {
+	color: var(--blue-deep);
+}
+
+#landing-page {
+	background: var(--paper);
+	color: var(--ink);
+}
+
+#landing-page h1,
+#landing-page h2,
+#landing-page h3 {
+	font-family: var(--font-display);
+}
+
+#landing-page .bg-white {
+	background: #ffffff;
+}
+
+#landing-page .bg-slate-900 {
+	background: var(--ink);
+}
+
+#landing-page .bg-slate-800\/80 {
+	background: rgb(22 57 88 / 82%);
+}
+
+#landing-page .text-indigo-600,
+#landing-page .text-indigo-700 {
+	color: var(--blue-deep);
+}
+
+#landing-page .bg-indigo-50 {
+	background: #eaf1ff;
+}
+
+#landing-page .text-indigo-400,
+#landing-page .text-indigo-300 {
+	color: #93b4ff;
+}
+
+#landing-page .bg-indigo-600 {
+	background: var(--blue);
+}
+
+#landing-page .rounded-xl,
+#landing-page .rounded-lg {
+	border-radius: 14px;
+}
+
+/* Give existing data surfaces the reference product's quieter rhythm. */
+.app-shell main > div {
+	max-width: 1180px;
+}
+
+.app-shell main .rounded-xl,
+.app-shell main .rounded-2xl {
+	border-radius: 14px;
+}
+
+.app-shell main .shadow-sm,
+.app-shell main .shadow-xs {
+	box-shadow: 0 1px 2px rgb(16 42 67 / 4%), 0 8px 24px rgb(16 42 67 / 3%);
+}
+
+.app-shell main .bg-white {
+	background: #ffffff;
+}
+
+.app-shell main .bg-indigo-600,
+.app-shell main .bg-indigo-500 {
+	background: var(--blue);
+}
+
+.app-shell main .text-indigo-600,
+.app-shell main .text-indigo-700 {
+	color: var(--blue-deep);
+}
+
+.app-shell main .bg-indigo-50 {
+	background: #eaf1ff;
+}
+
+.app-shell main .border-indigo-200,
+.app-shell main .border-indigo-100 {
+	border-color: #c7d7fe;
+}
+
+@media (max-width: 767px) {
+	.app-shell .app-main {
+		margin-left: 0;
+		padding-top: 72px;
+	}
+
+	.app-shell #app-header {
+		inset: 0 0 auto;
+		width: 100%;
+		height: 72px;
+		overflow: visible;
+		border-right: 0;
+		border-bottom: 1px solid var(--line);
+	}
+
+	.app-shell #app-header > div:last-child {
+		height: 72px;
+		padding: 12px 16px;
+		flex-direction: row;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.app-shell #app-header > div:last-child > div:last-child {
+		width: auto;
+		margin-top: 0;
+		padding-top: 0;
+		border-top: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.001ms !important;
+		transition-duration: 0.001ms !important;
+	}
+}
