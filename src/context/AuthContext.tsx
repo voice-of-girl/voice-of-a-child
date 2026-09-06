@@ -14,11 +14,11 @@ interface AuthContextType {
 
 const DEFAULT_USERS: Record<UserRole, User> = {
   ORGANISATION_ADMIN: {
-    id: "usr_admin",
-    email: "admin@femmetech.org",
-    first_name: "Dr. Amina",
-    last_name: "Okonjo",
-    phone_number: "+256 701 112233",
+    id: "usr_org",
+    email: "org@brightfuture.org",
+    first_name: "Programme",
+    last_name: "Coordinator",
+    phone_number: "+256700000000",
     role: "ORGANISATION_ADMIN",
     is_active: true,
     is_verified: true,
@@ -27,10 +27,10 @@ const DEFAULT_USERS: Record<UserRole, User> = {
   },
   BENEFICIARY: {
     id: "usr_beneficiary",
-    email: "fatima.zara@gmail.com",
-    first_name: "Fatima",
-    last_name: "Zara",
-    phone_number: "+256 788 334455",
+    email: "sarah.nakato@gmail.com",
+    first_name: "Sarah",
+    last_name: "Nakato",
+    phone_number: "+256771234567",
     role: "BENEFICIARY",
     is_active: true,
     is_verified: true,
@@ -38,22 +38,22 @@ const DEFAULT_USERS: Record<UserRole, User> = {
   },
   FIELD_OFFICER: {
     id: "usr_field_officer",
-    email: "sarah.k@femmetech.org",
-    first_name: "Sarah",
-    last_name: "Kibuuka",
-    phone_number: "+256 752 667788",
+    email: "org@risinghope.org",
+    first_name: "Programme",
+    last_name: "Coordinator",
+    phone_number: "+256700000001",
     role: "FIELD_OFFICER",
     is_active: true,
     is_verified: true,
-    organisation_id: "org_1",
+    organisation_id: "org_2",
     created_at: "2025-01-15T10:00:00Z"
   },
   PLATFORM_ADMIN: {
     id: "usr_platform_admin",
-    email: "director@voiceofagirl.org",
-    first_name: "Elena",
-    last_name: "Vance",
-    phone_number: "+256 700 990011",
+    email: "admin@voiceofagirl.org",
+    first_name: "Platform",
+    last_name: "Admin",
+    phone_number: "+256700000002",
     role: "PLATFORM_ADMIN",
     is_active: true,
     is_verified: true,
@@ -63,13 +63,13 @@ const DEFAULT_USERS: Record<UserRole, User> = {
 
 const DEFAULT_ORG: Organisation = {
   id: "org_1",
-  name: "FemmeTech Africa Foundation",
+  name: "Bright Future Girls Initiative",
   description: "Empowering young African women through high-impact technology training, mentorship, and career placement.",
-  organisation_type: "FOUNDATION",
-  email: "info@femmetech.org",
-  phone_number: "+256 700 123456",
-  website: "https://femmetech.org",
-  address: "Plot 14 Innovation Way, Bugolobi",
+  organisation_type: "NGO",
+  email: "org@brightfuture.org",
+  phone_number: "+256700000000",
+  website: "https://brightfuture.org",
+  address: "Plot 12, Kampala Road",
   district: "Kampala",
   country: "Uganda",
   verification_status: "VERIFIED",
@@ -99,15 +99,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       const result = await authService.login(email, password);
-      const found = result.user || Object.values(DEFAULT_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
+      const raw = (result.user?.role || '').toUpperCase();
+      const roleMap: Record<string, UserRole> = {
+        ADMIN: 'PLATFORM_ADMIN',
+        ORGANISATION: 'ORGANISATION_ADMIN',
+      };
+      const mappedRole = roleMap[raw] || 'ORGANISATION_ADMIN';
+      const found = result.user ? { ...result.user, role: mappedRole } : Object.values(DEFAULT_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
       if (!found) return null;
+      const userData = { ...found, role: mappedRole };
       localStorage.setItem('voice_access_token', result.access);
       if (result.refresh) localStorage.setItem('voice_refresh_token', result.refresh);
-      localStorage.setItem('voice_user', JSON.stringify(found));
-      setRole(found.role);
-      setUser(found);
-      setOrganisation(found.organisation_id ? DEFAULT_ORG : null);
-      return found.role;
+      localStorage.setItem('voice_user', JSON.stringify(userData));
+      setRole(mappedRole);
+      setUser(userData);
+      setOrganisation(userData.organisation_id ? DEFAULT_ORG : null);
+      return mappedRole;
     } catch {
       const found = Object.values(DEFAULT_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
       if (!found) return null;
