@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { UserRole } from '../types';
+import { api } from '../services/api';
 import { 
   ArrowRight, 
   CheckCircle2, 
@@ -17,6 +17,8 @@ import {
   GraduationCap,
   Sparkles,
   Award
+  , MapPin
+  , Phone
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -24,40 +26,50 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
-  const { switchRole, register, login } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState<null | 'ORG' | 'BENEFICIARY' | 'LOGIN'>(null);
+  const { login } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState<null | 'INTEREST' | 'LOGIN'>(null);
   const [authEmail, setAuthEmail] = useState('');
-  const [authOrgName, setAuthOrgName] = useState('');
   const [authFirstName, setAuthFirstName] = useState('');
   const [authLastName, setAuthLastName] = useState('');
+  const [authPhone, setAuthPhone] = useState('');
+  const [authDistrict, setAuthDistrict] = useState('Kampala');
+  const [authEducation, setAuthEducation] = useState('HIGH_SCHOOL');
+  const [authInterest, setAuthInterest] = useState('Technology and digital skills');
+  const [formMessage, setFormMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    setFormMessage(null);
     if (showAuthModal === 'LOGIN') {
-      login(authEmail);
-    } else if (showAuthModal === 'ORG') {
-      await register({
-        email: authEmail,
-        first_name: authFirstName || 'Org',
-        last_name: authLastName || 'Director',
-        role: 'ORGANISATION_ADMIN',
-        organisation_name: authOrgName || 'New Foundation'
-      });
-    } else if (showAuthModal === 'BENEFICIARY') {
-      await register({
-        email: authEmail,
-        first_name: authFirstName || 'Applicant',
-        last_name: authLastName || 'Youth',
-        role: 'BENEFICIARY'
-      });
+      if (login(authEmail)) {
+        setShowAuthModal(null);
+        onEnterApp();
+      } else {
+        setFormError('We could not find an authorised workspace for that email. Please contact the Voice of a Girl team.');
+      }
+      return;
     }
-    setShowAuthModal(null);
-    onEnterApp();
-  };
 
-  const selectPersonaAndGo = (role: UserRole) => {
-    switchRole(role);
-    onEnterApp();
+    try {
+      await api.submitBeneficiaryInterest({
+        first_name: authFirstName,
+        last_name: authLastName,
+        email: authEmail,
+        phone_number: authPhone,
+        district: authDistrict,
+        education_level: authEducation,
+        interest_area: authInterest
+      });
+      setFormMessage('Thank you. Your information has been securely sent to our programme team for review.');
+      setAuthFirstName('');
+      setAuthLastName('');
+      setAuthEmail('');
+      setAuthPhone('');
+    } catch (error) {
+      setFormError('We could not submit your information right now. Please check your connection and try again.');
+    }
   };
 
   return (
@@ -71,34 +83,46 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
               B2B SaaS for Beneficiary Management & Outcome Measurement
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
-              Reach the right people. <br className="hidden sm:inline" />
-              <span className="text-indigo-600">Monitor your programmes.</span> <br />
-              Measure what changes.
-            </h1>
-
-            <p className="mt-6 text-base sm:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-              The purpose-built data platform for NGOs, foundations, training institutions, and donors supporting girls and young women.
-            </p>
+            <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] items-center gap-10 text-left">
+              <div>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
+                  A clearer path to <span className="text-indigo-600">her next opportunity.</span>
+                </h1>
+                <p className="mt-6 text-base sm:text-lg text-slate-500 max-w-2xl leading-relaxed">
+                  Voice of a Girl helps our team connect young women with meaningful programmes while giving partners one trusted place to manage delivery and prove impact.
+                </p>
+              </div>
+              <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-xl">
+                <img
+                  src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=85"
+                  alt="Young women learning together"
+                  className="h-72 w-full object-cover sm:h-80"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent p-5 pt-16 text-white">
+                  <p className="text-sm font-semibold">Opportunities begin with being heard.</p>
+                  <p className="mt-1 text-xs text-white/80">Submit your details and our team will help you find the right fit.</p>
+                </div>
+              </div>
+            </div>
 
             {/* Action Buttons */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <button
-                onClick={() => setShowAuthModal('ORG')}
+                onClick={() => setShowAuthModal('LOGIN')}
                 className="px-5 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm shadow-sm transition-colors cursor-pointer flex items-center gap-2"
-                id="btn-register-org"
+                id="btn-organisation-login"
               >
                 <Building2 className="w-4 h-4" />
-                Register Organisation
+                Organisation sign in
               </button>
 
               <button
-                onClick={() => setShowAuthModal('BENEFICIARY')}
+                onClick={() => setShowAuthModal('INTEREST')}
                 className="px-5 py-2.5 rounded-md bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm border border-slate-200 shadow-xs transition-colors cursor-pointer flex items-center gap-2"
                 id="btn-join-participant"
               >
                 <GraduationCap className="w-4 h-4" />
-                Join as Participant
+                Find your opportunity
               </button>
 
               <button
@@ -110,55 +134,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
               </button>
             </div>
 
-            {/* Instant Demo Role Personas (Quick Preview) */}
+            {/* Public intake promise */}
             <div className="mt-12 pt-8 border-t border-slate-100 max-w-3xl mx-auto">
               <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
-                Or jump straight in with an interactive role persona:
+                A simple, supported journey
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <button
-                  onClick={() => selectPersonaAndGo('ORGANISATION_ADMIN')}
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 transition-colors text-left cursor-pointer group"
-                >
-                  <div className="text-xs font-semibold text-slate-900 group-hover:text-indigo-700 flex items-center justify-between">
-                    <span>Org Admin</span>
-                    <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-indigo-600" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+                {['Tell us about yourself', 'Our team reviews your fit', 'We connect you to the right programme'].map((step, index) => (
+                  <div key={step} className="flex gap-3 rounded-lg bg-slate-50 border border-slate-200 p-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">{index + 1}</span>
+                    <span className="text-xs font-semibold text-slate-700">{step}</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 truncate">FemmeTech Africa</div>
-                </button>
-
-                <button
-                  onClick={() => selectPersonaAndGo('BENEFICIARY')}
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-200 transition-colors text-left cursor-pointer group"
-                >
-                  <div className="text-xs font-semibold text-slate-900 group-hover:text-emerald-700 flex items-center justify-between">
-                    <span>Beneficiary</span>
-                    <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-emerald-600" />
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 truncate">Fatima (Scholarship)</div>
-                </button>
-
-                <button
-                  onClick={() => selectPersonaAndGo('FIELD_OFFICER')}
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-blue-50/50 border border-slate-200 hover:border-blue-200 transition-colors text-left cursor-pointer group"
-                >
-                  <div className="text-xs font-semibold text-slate-900 group-hover:text-blue-700 flex items-center justify-between">
-                    <span>Field Officer</span>
-                    <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-blue-600" />
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 truncate">Sarah (Field Visits)</div>
-                </button>
-
-                <button
-                  onClick={() => selectPersonaAndGo('PLATFORM_ADMIN')}
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-200 transition-colors text-left cursor-pointer group"
-                >
-                  <div className="text-xs font-semibold text-slate-900 group-hover:text-amber-700 flex items-center justify-between">
-                    <span>Platform Admin</span>
-                    <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-amber-600" />
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 truncate">System Governance</div>
-                </button>
+                ))}
               </div>
             </div>
           </div>
@@ -286,7 +273,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
         </div>
       </section>
 
-      {/* Auth / Register Modal */}
+      {/* Public intake and controlled sign-in */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 relative">
@@ -298,32 +285,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
             </button>
 
             <h3 className="text-xl font-bold text-slate-900 mb-1">
-              {showAuthModal === 'ORG' && 'Register Your Organisation'}
-              {showAuthModal === 'BENEFICIARY' && 'Join as a Participant'}
+              {showAuthModal === 'INTEREST' && 'Tell us where you want to go'}
               {showAuthModal === 'LOGIN' && 'Sign In to Voice of a Girl'}
             </h3>
             <p className="text-xs text-slate-500 mb-5">
-              {showAuthModal === 'ORG' && 'Manage programmes, deploy surveys, and generate impact reports.'}
-              {showAuthModal === 'BENEFICIARY' && 'Access scholarship opportunities and complete surveys.'}
-              {showAuthModal === 'LOGIN' && 'Enter your registered email address to access your dashboard.'}
+              {showAuthModal === 'INTEREST' && 'Share a few details. Our programme team will review your information and contact you about a suitable opportunity.'}
+              {showAuthModal === 'LOGIN' && 'This sign-in is for authorised organisation, field, and platform team members.'}
             </p>
 
-            <form onSubmit={handleAuthSubmit} className="space-y-3.5">
-              {showAuthModal === 'ORG' && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Organisation Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={authOrgName}
-                    onChange={(e) => setAuthOrgName(e.target.value)}
-                    placeholder="e.g. Hope Empowerment Foundation"
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  />
-                </div>
-              )}
+            {formMessage && <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs font-medium text-emerald-800"><CheckCircle2 className="mr-1 inline h-4 w-4" />{formMessage}</div>}
+            {formError && <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-800">{formError}</div>}
 
-              {showAuthModal !== 'LOGIN' && (
+            <form onSubmit={handleAuthSubmit} className="space-y-3.5">
+              {showAuthModal === 'INTEREST' && (
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">First Name</label>
@@ -362,12 +336,47 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
                 />
               </div>
 
+              {showAuthModal === 'INTEREST' && (
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1"><Phone className="mr-1 inline h-3.5 w-3.5" />Phone number</label>
+                      <input type="tel" required value={authPhone} onChange={(e) => setAuthPhone(e.target.value)} placeholder="+256 700 000000" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1"><MapPin className="mr-1 inline h-3.5 w-3.5" />District</label>
+                      <input type="text" required value={authDistrict} onChange={(e) => setAuthDistrict(e.target.value)} placeholder="Kampala" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Highest education level</label>
+                    <select value={authEducation} onChange={(e) => setAuthEducation(e.target.value)} className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                      <option value="PRIMARY">Primary</option>
+                      <option value="SECONDARY">Secondary</option>
+                      <option value="HIGH_SCHOOL">High school</option>
+                      <option value="VOCATIONAL">Vocational certificate</option>
+                      <option value="UNDERGRADUATE">Undergraduate degree</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">What are you interested in?</label>
+                    <select value={authInterest} onChange={(e) => setAuthInterest(e.target.value)} className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                      <option>Technology and digital skills</option>
+                      <option>Entrepreneurship and business</option>
+                      <option>Scholarships and education</option>
+                      <option>Leadership and mentorship</option>
+                      <option>Creative and vocational skills</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
               <div className="pt-2">
                 <button
                   type="submit"
                   className="w-full py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-sm transition-colors cursor-pointer"
                 >
-                  {showAuthModal === 'LOGIN' ? 'Sign In Now' : 'Create Account & Enter'}
+                  {showAuthModal === 'LOGIN' ? 'Sign in securely' : 'Submit my information'}
                 </button>
               </div>
             </form>
@@ -384,8 +393,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
           <div className="flex items-center gap-4">
             <span>Built with Django REST Architecture & React</span>
             <span>•</span>
-            <button onClick={() => selectPersonaAndGo('ORGANISATION_ADMIN')} className="hover:text-slate-900 underline cursor-pointer">
-              Launch App
+            <button onClick={() => setShowAuthModal('LOGIN')} className="hover:text-slate-900 underline cursor-pointer">
+              Team sign in
             </button>
           </div>
         </div>

@@ -103,6 +103,8 @@ async function startServer() {
     }
   ];
 
+  let beneficiaryInterestSubmissions: any[] = [];
+
   let beneficiaryProfiles: Record<string, any> = {
     "usr_beneficiary": {
       user_id: "usr_beneficiary",
@@ -891,6 +893,33 @@ async function startServer() {
   }
 
   // ==================== RESTful API ROUTES ====================
+
+  // Public beneficiary intake. This records interest for staff review without creating a login.
+  app.get("/api/public/beneficiary-interest/", (_req, res) => {
+    res.json(beneficiaryInterestSubmissions);
+  });
+
+  app.post("/api/public/beneficiary-interest/", (req, res) => {
+    const { first_name, last_name, email, phone_number, district, education_level, interest_area } = req.body;
+    if (!first_name || !last_name || !email || !phone_number || !district || !education_level || !interest_area) {
+      return res.status(400).json({ detail: "All intake fields are required." });
+    }
+
+    const submission = {
+      id: `interest_${Date.now()}`,
+      first_name,
+      last_name,
+      email,
+      phone_number,
+      district,
+      education_level,
+      interest_area,
+      status: "NEW",
+      submitted_at: new Date().toISOString()
+    };
+    beneficiaryInterestSubmissions.unshift(submission);
+    return res.status(201).json(submission);
+  });
 
   // Auth Endpoints
   app.post("/api/auth/login/", (req, res) => {

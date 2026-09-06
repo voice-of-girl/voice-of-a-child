@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User, UserRole, Organisation } from '../types';
 
 interface AuthContextType {
@@ -6,9 +6,8 @@ interface AuthContextType {
   organisation: Organisation | null;
   role: UserRole;
   switchRole: (newRole: UserRole) => void;
-  login: (email: string) => void;
+  login: (email: string) => boolean;
   logout: () => void;
-  register: (data: any) => Promise<void>;
   notificationsCount: number;
 }
 
@@ -98,43 +97,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const found = Object.values(DEFAULT_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
     if (found) {
       switchRole(found.role);
+      return true;
     } else {
-      // Default to beneficiary if new email
-      const customUser: User = {
-        id: `usr_${Date.now()}`,
-        email,
-        first_name: email.split('@')[0],
-        last_name: "Participant",
-        role: "BENEFICIARY",
-        is_active: true,
-        is_verified: true,
-        created_at: new Date().toISOString()
-      };
-      setRole('BENEFICIARY');
-      setUser(customUser);
-      setOrganisation(null);
+      return false;
     }
   };
 
   const logout = () => {
     setUser(null);
-  };
-
-  const register = async (data: any) => {
-    try {
-      const res = await fetch('/api/auth/register/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
-      if (result.user) {
-        setUser(result.user);
-        setRole(result.user.role);
-      }
-    } catch (e) {
-      console.error('Registration failed:', e);
-    }
   };
 
   return (
@@ -146,7 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchRole,
         login,
         logout,
-        register,
         notificationsCount
       }}
     >
