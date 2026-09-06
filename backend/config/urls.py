@@ -1,26 +1,38 @@
+"""Root URL configuration for the Voice of a Girl platform."""
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.urls import include, path
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
+
+api_v1 = [
+    path("auth/", include("apps.accounts.urls")),
+    path("organisations/", include("apps.organisations.urls")),
+    path("programmes/", include("apps.programmes.urls")),
+    path("participants/", include("apps.participants.urls")),
+    path("surveys/", include("apps.surveys.urls")),
+    path("survey-responses/", include("apps.surveys.response_urls")),
+    path("public/surveys/", include("apps.surveys.public_urls")),
+    path("monitoring/", include("apps.monitoring.urls")),
+    path("impact/", include("apps.impact.urls")),
+    path("reports/", include("apps.reports.urls")),
+    path("impact-projects/", include("apps.impact.project_urls")),
+    path("admin/", include("apps.organisations.platform_admin_urls")),
+]
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    # OpenAPI Schema & Docs
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-
-    # API Endpoints
-    path('api/auth/', include('apps.accounts.urls')),
-    path('api/organisations/', include('apps.organisations.urls')),
-    path('api/beneficiaries/', include('apps.beneficiaries.urls')),
-    path('api/programmes/', include('apps.programmes.urls')),
-    path('api/opportunities/', include('apps.opportunities.urls')),
-    path('api/applications/', include('apps.applications.urls')),
-    path('api/participation/', include('apps.participation.urls')),
-    path('api/forms/', include('apps.forms.urls')),
-    path('api/monitoring/', include('apps.monitoring.urls')),
-    path('api/challenges/', include('apps.challenges.urls')),
-    path('api/impact/', include('apps.impact.urls')),
-    path('api/notifications/', include('apps.notifications.urls')),
-    path('api/verification/', include('apps.verification.urls')),
-    path('api/analytics/', include('apps.analytics.urls')),
+    path("admin/", admin.site.urls),
+    # OpenAPI / Swagger documentation
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    # Versioned API routes
+    path("api/", include(api_v1)),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

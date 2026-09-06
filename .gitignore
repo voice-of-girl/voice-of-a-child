@@ -7,5 +7,18 @@ coverage/
 .env*
 !.env.example
 
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local databases and generated files
+*.sqlite3
+media/
+staticfiles/
+pytest_*.txt
+
 # Local-only dev helper scripts (machine-specific absolute paths)
 /start-dev.cmd

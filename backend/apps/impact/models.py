@@ -1,71 +1,130 @@
-from django.db import models
+"""Impact models: KPIs, impact measurements and standalone impact projects."""
 from django.conf import settings
-from apps.programmes.models import Programme
+from django.db import models
 
-class KPI(models.Model):
-    class Category(models.TextChoices):
-        INPUT = 'INPUT', 'Input (Resources, Budget, Equipment)'
-        ACTIVITY = 'ACTIVITY', 'Activity (Trainings, Workshops, Mentorship Sessions)'
-        OUTPUT = 'OUTPUT', 'Output (Participants Reached, Trained, Completed)'
-        OUTCOME = 'OUTCOME', 'Outcome (Employment, Skills Acquired, Income Gained)'
-        IMPACT = 'IMPACT', 'Longer-term Impact (Sustained Business, Career Trajectory)'
+from apps.core.models import OrganisationScopedModel
+
+
+class ImpactProject(OrganisationScopedModel):
+    class Status(models.TextChoices):
+        DRAFT = "DRAFT", "Draft"
+        ACTIVE = "ACTIVE", "Active"
+        COMPLETED = "COMPLETED", "Completed"
+        ARCHIVED = "ARCHIVED", "Archived"
+
+    name = models.CharField(max_length=255, db_index=True)
+    description = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.ACTIVE, db_index=True
+    )
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="created_projects",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["organisation", "status"])]
+
+    def __str__(self):
+        return self.name
+
+
+class KPI(OrganisationScopedModel):
+    class Status(models.TextChoices):
+        NOT_STARTED = "NOT_STARTED", "Not Started"
+        ON_TRACK = "ON_TRACK", "On Track"
+        AT_RISK = "AT_RISK", "At Risk"
+        ACHIEVED = "ACHIEVED", "Achieved"
 
     programme = models.ForeignKey(
-        Programme,
-        on_delete=models.CASCADE,
-        related_name='kpis'
+        "programmes.Programme",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="kpis",
+        db_index=True,
     )
-    name = models.CharField(max_length=255)
+    impact_project = models.ForeignKey(
+        ImpactProject,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="kpis",
+        db_index=True,
+    )
+    name = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)
-    category = models.CharField(max_length=20, choices=Category.choices, default=Category.OUTPUT)
-    target_value = models.FloatField()
+    unit = models.CharField(max_length=80, default="%")
+    baseline = models.FloatField(null=True, blank=True)
     current_value = models.FloatField(default=0.0)
-    unit = models.CharField(max_length=50, default='participants') # e.g. participants, USD, hours, %
-    measurement_frequency = models.CharField(max_length=50, default='Monthly') # e.g. Weekly, Monthly, Milestone
+    target = models.FloatField(null=True, blank=True)
+    endline = models.FloatField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.NOT_STARTED, db_index=True
+    )
+    trend_data = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        indexes = [models.Index(fields=["organisation", "programme"])]
+
+    def __str__(self):
+        return self.name
 
     @property
     def progress_percentage(self):
-        if self.target_value == 0:
+        """Progress from baseline towards target (clamped 0-100)."""
+        if self.target is None or self.target == 0:
             return 0.0
-        return min(100.0, round((self.current_value / self.target_value) * 100, 1))
+        if self.baseline is not None and self.target != self.baseline:
+            progress = (self.current_value - self.baseline) / (self.target - self.baseline) * 100
+        else:
+            progress = self.current_value / self.target * 100
+        return round(max(0.0, min(100.0, progress)), 2)
 
-    def __str__(self):
-        return f"KPI: {self.name} ({self.current_value}/{self.target_value} {self.unit})"
 
-class OutcomeMeasurement(models.Model):
-    class Stage(models.TextChoices):
-        BASELINE = 'BASELINE', 'Baseline (Before Programme)'
-        MIDLINE = 'MIDLINE', 'Midline / Monitoring'
-        ENDLINE = 'ENDLINE', 'Endline (Immediately After)'
-        FOLLOW_UP_3M = 'FOLLOW_UP_3M', 'Follow-up (3 Months)'
-        FOLLOW_UP_6M = 'FOLLOW_UP_6M', 'Follow-up (6 Months)'
-        FOLLOW_UP_12M = 'FOLLOW_UP_12M', 'Follow-up (12 Months)'
-
+class ImpactMeasurement(OrganisationScopedModel):
     programme = models.ForeignKey(
-        Programme,
-        on_delete=models.CASCADE,
-        related_name='outcome_measurements'
+        "programmes.Programme",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="impact_measurements",
     )
-    beneficiary = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='outcome_records'
+    survey = models.ForeignKey(
+        "surveys.Survey",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="impact_measurements",
     )
-    stage = models.CharField(max_length=30, choices=Stage.choices)
-    
-    # Tracked dimensions
-    employment_status = models.CharField(max_length=100, blank=True)
-    education_status = models.CharField(max_length=100, blank=True)
-    skills_level = models.CharField(max_length=100, blank=True) # Beginner, Intermediate, Advanced
-    monthly_income_usd = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    business_established = models.BooleanField(default=False)
-    confidence_score = models.IntegerField(default=5, help_text="Rating 1-10")
-    
-    recorded_at = models.DateTimeField(auto_now_add=True)
+    kpi = models.ForeignKey(
+        KPI,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="measurements",
+    )
+    impact_project = models.ForeignKey(
+        ImpactProject,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="impact_measurements",
+    )
+    metric = models.CharField(max_length=255)
+    value = models.FloatField()
+    period = models.DateField(db_index=True)
     notes = models.TextField(blank=True)
 
     class Meta:
-        unique_together = ('programme', 'beneficiary', 'stage')
+        ordering = ["-period"]
+        indexes = [models.Index(fields=["organisation", "period"])]
 
     def __str__(self):
-        return f"{self.beneficiary.email} [{self.stage}] in {self.programme.title}"
+        return f"{self.metric}: {self.value} ({self.period})"
