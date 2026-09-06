@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../types';
 import { 
   Building2, 
@@ -17,6 +18,8 @@ import {
   , Layers3
   , UsersRound
   , BarChart3
+  , Activity
+  , TrendingUp
   , Settings2
 } from 'lucide-react';
 
@@ -27,6 +30,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) => {
   const { user, role, switchRole, organisation, notificationsCount, logout } = useAuth();
+  const navigate = useNavigate();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
 
@@ -61,16 +65,24 @@ export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) =
   const managedRoles: UserRole[] = ['ORGANISATION_ADMIN', 'FIELD_OFFICER', 'PLATFORM_ADMIN'];
   const workspaceItems = role === 'ORGANISATION_ADMIN'
     ? [
-        { label: 'Overview', icon: LayoutDashboard },
-        { label: 'Programmes', icon: Layers3 },
-        { label: 'Participants', icon: UsersRound },
-        { label: 'Impact & reports', icon: BarChart3 },
+        { label: 'Dashboard', icon: LayoutDashboard, path: '/organisation/dashboard' },
+        { label: 'Programmes', icon: Layers3, path: '/organisation/programmes' },
+        { label: 'Participants', icon: UsersRound, path: '/organisation/participants' },
+        { label: 'Surveys', icon: ClipboardCheck, path: '/organisation/surveys' },
+        { label: 'Monitoring', icon: Activity, path: '/organisation/monitoring' },
+        { label: 'Impact', icon: TrendingUp, path: '/organisation/impact' },
+        { label: 'Reports', icon: BarChart3, path: '/organisation/reports' },
+        { label: 'Settings', icon: Settings2, path: '/organisation/settings' },
       ]
       : [
-          { label: 'Workspace overview', icon: LayoutDashboard },
-          { label: 'Verification queue', icon: ClipboardCheck },
-          { label: 'Reports', icon: BarChart3 },
-          { label: 'Settings', icon: Settings2 },
+          { label: 'Dashboard', icon: LayoutDashboard, path: role === 'PLATFORM_ADMIN' ? '/admin/dashboard' : '/field/dashboard' },
+          { label: 'Organisations', icon: Building2, path: '/admin/organisations' },
+          { label: 'Participants', icon: UsersRound, path: '/admin/participants' },
+          { label: 'Programmes', icon: Layers3, path: '/admin/programmes' },
+          { label: 'Surveys', icon: ClipboardCheck, path: '/admin/surveys' },
+          { label: 'Impact projects', icon: TrendingUp, path: '/admin/impact-projects' },
+          { label: 'Analytics & reports', icon: BarChart3, path: '/admin/analytics' },
+          { label: 'Settings', icon: Settings2, path: '/admin/settings' },
         ];
 
   return (
@@ -136,13 +148,14 @@ export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) =
             {workspaceItems.map((item, index) => {
               const Icon = item.icon;
               return (
-                <div
+                <button
                   key={item.label}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${index === 0 ? 'bg-blue-50 text-blue-700' : 'text-slate-500'}`}
+                  onClick={() => navigate(item.path)}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${index === 0 ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{item.label}</span>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -181,6 +194,7 @@ export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) =
                         switchRole(r);
                         setShowRoleMenu(false);
                         setShowLanding(false);
+                        navigate(r === 'PLATFORM_ADMIN' ? '/admin/dashboard' : r === 'FIELD_OFFICER' ? '/field/dashboard' : '/organisation/dashboard');
                       }}
                       className={`w-full text-left px-3 py-2.5 flex items-start gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer ${
                         isSelected ? 'bg-indigo-50/80 text-indigo-950 font-medium' : 'text-slate-700'
@@ -253,6 +267,9 @@ export const Header: React.FC<HeaderProps> = ({ showLanding, setShowLanding }) =
 
           {/* User Info Capsule */}
           <div className="hidden lg:flex items-center gap-2 pl-2 border-l border-slate-200 text-xs">
+                      <button onClick={() => { logout(); navigate('/'); }} className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-600" title="Log out">
+                        <LogOut className="h-4 w-4" /> Logout
+                      </button>
             <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700">
               {user?.first_name?.[0] || 'U'}
             </div>
