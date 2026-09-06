@@ -19,6 +19,7 @@ import {
   Award
   , MapPin
   , Phone
+  , Menu
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -43,7 +44,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
     setFormError(null);
     setFormMessage(null);
     if (showAuthModal === 'LOGIN') {
-      if (login(authEmail)) {
+      if (await login(authEmail, '')) {
         setShowAuthModal(null);
         onEnterApp();
       } else {
@@ -74,6 +75,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] text-slate-900 flex flex-col justify-between" id="landing-page">
+      <header className="public-nav">
+        <div className="public-nav__inner">
+          <button className="public-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Voice of a Girl home">
+            <span className="public-brand__mark">VG</span>
+            <span>
+              <strong>Voice of a Girl</strong>
+              <small>Opportunity, measured.</small>
+            </span>
+          </button>
+          <nav className="public-nav__links" aria-label="Public navigation">
+            <a href="#how-it-works">How it works</a>
+            <a href="#for-organisations">For organisations</a>
+            <button onClick={() => setShowAuthModal('LOGIN')}>Team sign in <ArrowRight className="h-3.5 w-3.5" /></button>
+          </nav>
+          <button className="public-nav__menu" onClick={() => setShowAuthModal('LOGIN')} aria-label="Open team sign in">
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+      </header>
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-28 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -153,7 +173,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
       </section>
 
       {/* Core Value Chain Section */}
-      <section className="py-16 bg-slate-900 text-white" id="value-chain-section">
+      <section className="py-16 bg-slate-900 text-white" id="how-it-works">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <span className="text-indigo-400 text-xs font-semibold tracking-widest uppercase">The Platform Journey</span>
@@ -228,7 +248,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
       </section>
 
       {/* Key Feature Pillars */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white" id="for-organisations">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
