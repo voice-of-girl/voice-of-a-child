@@ -45,7 +45,7 @@ export function PublicHomePage() {
           </div>
           <div className="public-hero__visual">
             <div className="public-hero__image-frame">
-              <img src="https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=1200&q=85" alt="Black African girls in a rural classroom" />
+              <img src="/hero-girls.jpg" alt="Black African girls in a rural classroom" />
               <div className="public-hero__caption"><span className="public-status-dot" /> A supported journey, from first contact to measurable change.</div>
             </div>
             <div className="public-hero__note"><ShieldCheck className="h-5 w-5" /><span><strong>Safeguarding first</strong><small>Every record is reviewed by the programme team.</small></span></div>
