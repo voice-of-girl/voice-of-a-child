@@ -26,4 +26,6 @@ urlpatterns = [
     path("api/analytics/", include("apps.analytics.urls")),
     path("api/reports/", include("apps.reports.urls")),
     path("api/impact-projects/", include("apps.impact_projects.urls")),
+    # USSD (Africa's Talking)
+    path("api/ussd/", include("apps.ussd.urls")),
 ]

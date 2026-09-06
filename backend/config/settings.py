@@ -3,6 +3,7 @@
 All secrets and environment-specific values are read from environment
 variables (a ``backend/.env`` file is supported through django-environ).
 """
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     "apps.analytics",
     "apps.reports",
     "apps.impact_projects",
+    "apps.ussd",
 ]
 
 MIDDLEWARE = [
@@ -154,6 +156,12 @@ CORS_ALLOWED_ORIGINS = env.list(
         "http://127.0.0.1:3000",
     ],
 )
+
+AFRICASTALKING_USERNAME = os.getenv('AFRICASTALKING_USERNAME', '')
+AFRICASTALKING_API_KEY = os.getenv('AFRICASTALKING_API_KEY', '')
+AFRICASTALKING_USSD_SERVICE_CODE = os.getenv('AFRICASTALKING_USSD_SERVICE_CODE', '')
+AFRICASTALKING_USSD_CALLBACK_URL = os.getenv('AFRICASTALKING_USSD_CALLBACK_URL', '')
+USSD_MAX_CALLS_PER_MINUTE = int(os.getenv('USSD_MAX_CALLS_PER_MINUTE', '30'))
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Voice of a Girl API",
