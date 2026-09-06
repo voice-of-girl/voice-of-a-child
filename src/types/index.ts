@@ -1,262 +1,356 @@
-export type UserRole = 'BENEFICIARY' | 'ORGANISATION_ADMIN' | 'FIELD_OFFICER' | 'PLATFORM_ADMIN';
+/**
+ * Voice of a Girl — frontend type definitions.
+ * Mirrors the Django REST API contracts exactly so the compiler guards the
+ * integration.
+ */
 
-export interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone_number?: string;
-  role: UserRole;
-  is_active: boolean;
-  is_verified: boolean;
-  organisation_id?: string;
-  created_at: string;
+export type Role =
+  | "PLATFORM_ADMIN" | "ORGANISATION_ADMIN"
+  | "PROGRAMME_MANAGER" | "MONITORING_OFFICER" | "STAFF";
+
+export interface Paginated<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }
 
 export interface Organisation {
   id: string;
   name: string;
-  description: string;
-  organisation_type: 'NGO' | 'FOUNDATION' | 'TRAINING_INSTITUTE' | 'EMPLOYER' | 'GOVERNMENT' | 'COMMUNITY_BASED';
+  description?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  address?: string;
+  district?: string;
+  country?: string;
+  verification_status?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface User {
+  id: string;
   email: string;
-  phone_number: string;
-  website: string;
-  address: string;
-  district: string;
-  country: string;
-  verification_status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  phone_number?: string;
+  role: Role;
+  organisation?: Organisation;
+  organisation_name?: string;
+  is_active: boolean;
   created_at: string;
 }
 
-export interface BeneficiaryProfile {
-  user_id: string;
-  date_of_birth?: string;
-  gender: string;
-  district: string;
-  region: string;
-  country: string;
-  education_level: string;
-  school_or_institution: string;
-  employment_status: string;
-  career_goals: string;
-  bio: string;
-  skills: string[];
-  interests: string[];
-  profile_completed: boolean;
+export interface LoginResult {
+  access: string;
+  refresh: string;
+  user: User;
 }
 
-export type ProgrammeType = 'NEW_PROGRAMME' | 'EXISTING_PROGRAMME';
-export type ProgrammeStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CLOSED';
+export type ProgrammeStatus = "PLANNED" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
 
 export interface Programme {
   id: string;
-  organisation_id: string;
+  organisation: string;
+  organisation_name?: string;
   title: string;
-  name?: string;
-  description: string;
-  category: string;
-  programme_type: ProgrammeType;
-  location: string;
-  locations?: string[];
-  start_date: string;
-  end_date: string;
+  name: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
   status: ProgrammeStatus;
-  target_beneficiaries: number;
   target_participants?: number;
-  current_beneficiaries?: number;
-  completion_rate?: number;
-  attendance_rate?: number;
-  dropout_rate?: number;
-  criteria_education?: string[];
-  criteria_skills?: string[];
-  criteria_locations?: string[];
-  criteria_min_age?: number;
-  criteria_max_age?: number;
-  eligibility_criteria?: any;
-  outcomes_aimed?: string[];
+    participant_count?: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export type ParticipationStatus = 'REGISTERED' | 'SELECTED' | 'ACTIVE' | 'COMPLETED' | 'DROPPED_OUT';
 
-export interface BeneficiaryParticipation {
+export type QuestionType =
+  | "SHORT_TEXT" | "LONG_TEXT" | "NUMBER" | "EMAIL" | "DATE"
+  | "YES_NO" | "MULTIPLE_CHOICE" | "CHECKBOX"
+  | "DROPDOWN" | "RATING_SCALE";
+
+export interface SurveyQuestion {
   id: string;
-  beneficiary_id: string;
-  programme_id: string;
-  participation_status: ParticipationStatus;
-  status?: ParticipationStatus;
-  attendance_rate: number;
-  joined_at: string;
-  completed_at?: string;
-  outcome_notes?: string;
-  // enriched fields for UI
-  beneficiary_name?: string;
-  beneficiary_email?: string;
-  beneficiary?: any;
-  completed_surveys_count?: number;
-  match_score?: number;
-  match_reasons?: string[];
-  matching_reasons?: string[];
-  missing_requirements?: string[];
-}
-
-export type OpportunityType = 'SCHOLARSHIP' | 'JOB' | 'INTERNSHIP' | 'TRAINING' | 'MENTORSHIP' | 'FELLOWSHIP' | 'ENTREPRENEURSHIP' | 'GRANT';
-
-export interface Opportunity {
-  id: string;
-  programme_id: string;
-  title: string;
-  description: string;
-  opportunity_type: OpportunityType;
-  benefits: string;
-  requirements: string;
-  application_deadline: string;
-  available_slots: number;
-  status: 'OPEN' | 'CLOSED' | 'FILLED';
-  organisation_name?: string;
-  location?: string;
-  match_score?: number;
-  match_reasons?: string[];
-}
-
-export type ApplicationStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'SHORTLISTED' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
-
-export interface Application {
-  id: string;
-  beneficiary_id: string;
-  opportunity_id: string;
-  status: ApplicationStatus;
-  application_date: string;
-  statement_of_purpose?: string;
-  notes?: string;
-  reviewed_by?: string;
-  opportunity_title?: string;
-  organisation_name?: string;
-}
-
-export type FormType = 'BASELINE' | 'MONITORING' | 'ENDLINE' | 'FOLLOW_UP' | 'CUSTOM';
-export type FormStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
-export type QuestionType = 
-  | 'SHORT_TEXT' 
-  | 'LONG_TEXT' 
-  | 'NUMBER' 
-  | 'MULTIPLE_CHOICE' 
-  | 'CHECKBOX' 
-  | 'DROPDOWN' 
-  | 'YES_NO' 
-  | 'RATING_SCALE' 
-  | 'DATE' 
-  | 'FILE_UPLOAD';
-
-export interface FormQuestion {
-  id: string;
-  form_id: string;
-  question_text: string;
+  question: string;
   help_text?: string;
   question_type: QuestionType;
+  options?: string[];
   required: boolean;
-  options: string[];
   order: number;
+  validation_rules?: Record<string, unknown>;
 }
 
-export interface Form {
+export type SurveyStage = "BASELINE" | "MIDLINE" | "ENDLINE" | "CUSTOM";
+export type SurveyStatus = "DRAFT" | "PUBLISHED" | "CLOSED";
+
+export interface Survey {
   id: string;
-  organisation_id: string;
-  programme_id: string;
+  organisation: string;
+  organisation_name?: string;
+  programme?: string | null;
+  programme_name?: string | null;
+  impact_project?: string | null;
+  project_name?: string | null;
   title: string;
-  description: string;
-  form_type: FormType;
-  status: FormStatus;
-  response_deadline?: string;
-  follow_up_interval_months?: number;
-  created_at: string;
-  questions?: FormQuestion[];
+  description?: string;
+  stage: SurveyStage;
+  status: SurveyStatus;
+  public_token: string;
+  public_url?: string;
+  start_date?: string;
+  end_date?: string;
+  allow_multiple_responses?: boolean;
+  thank_you_message?: string;
   responses_count?: number;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  questions?: SurveyQuestion[];
 }
 
-export interface FormResponse {
+export type ResponseStatus = "SUBMITTED" | "DRAFT";
+
+export interface AnswerRead {
   id: string;
-  form_id: string;
-  beneficiary_id: string;
-  submitted_at?: string;
-  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED';
-  submitted_via: string;
-  answers?: Record<string, any>; // question_id -> value
-  beneficiary_name?: string;
+  question: string;
+  question_type: QuestionType;
+  order: number;
+  value: unknown;
 }
 
-export type ChallengeCategory = 'TRANSPORT' | 'FINANCIAL' | 'HEALTH' | 'ATTENDANCE' | 'SAFETY' | 'MATERIALS' | 'FAMILY_CARE' | 'OTHER';
-export type ChallengeSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type ChallengeStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
+export interface SurveyResponse {
+  id: string;
+  survey: string;
+  survey_title?: string;
+  programme?: string | null;
+  programme_name?: string | null;
+  participant?: string | null;
+  participant_name?: string | null;
+  respondent_name?: string;
+  respondent_email?: string;
+  status: ResponseStatus;
+  submitted_at?: string;
+  metadata?: Record<string, unknown>;
+  answers?: AnswerRead[];
+}
+
+export type ParticipantStatus = "ACTIVE" | "COMPLETED" | "DROPPED_OUT" | "INACTIVE";
+
+export interface Participant {
+  id: string;
+  organisation: string;
+  organisation_name?: string;
+  programme?: string | null;
+  programme_name?: string | null;
+  name?: string;
+  email?: string;
+  phone?: string;
+  external_reference?: string;
+  gender?: string;
+  date_of_birth?: string;
+  age?: number;
+  location?: string;
+  district?: string;
+  status: ParticipantStatus;
+    enrolled_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ChallengePriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type ChallengeStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED";
 
 export interface Challenge {
   id: string;
-  programme_id: string;
-  programme_title?: string;
-  beneficiary_id: string;
-  beneficiary_name?: string;
-  category: ChallengeCategory;
-  description: string;
-  severity: ChallengeSeverity;
+  organisation: string;
+  programme?: string | null;
+  participant?: string | null;
+  category: string;
+  title: string;
+  description?: string;
   status: ChallengeStatus;
-  assigned_to?: string;
-  assigned_to_name?: string;
-  reported_at: string;
-  resolved_at?: string;
+  priority: ChallengePriority;
+  assigned_to?: string | null;
   resolution_notes?: string;
-  audit_history?: Array<{
-    timestamp: string;
-    actor: string;
-    action: string;
-    note?: string;
-  }>;
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
 }
+
+export interface Feedback {
+  id: string;
+  organisation: string;
+  programme?: string | null;
+  participant?: string | null;
+  category: string;
+  message: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupportRequest {
+  id: string;
+  organisation: string;
+  programme?: string | null;
+  participant?: string | null;
+  category: string;
+  description: string;
+  status: string;
+  assigned_to?: string | null;
+  resolution_notes?: string;
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type KpiStatus = "ON_TRACK" | "AT_RISK" | "OFF_TRACK" | "COMPLETED";
 
 export interface KPI {
   id: string;
-  programme_id: string;
+  organisation: string;
+  programme?: string | null;
+  impact_project?: string | null;
   name: string;
   description?: string;
-  category: 'INPUT' | 'ACTIVITY' | 'OUTPUT' | 'OUTCOME' | 'IMPACT';
-  target_value: number;
-  current_value: number;
-  unit: string;
-  measurement_frequency: string;
-}
-
-export interface OutcomeRecord {
-  metric_name: string;
-  baseline: number | string;
-  endline: number | string;
-  follow_up_6m: number | string;
   unit?: string;
-  percentage_change: number;
-  category: 'EMPLOYMENT' | 'SKILLS' | 'INCOME' | 'EDUCATION' | 'WELLBEING';
+  target?: number;
+  baseline?: number;
+  current_value?: number;
+  endline?: number;
+  status: KpiStatus;
+  progress_percentage?: number;
 }
 
-export interface VerificationTask {
+export interface ImpactMeasurement {
   id: string;
-  assigned_officer_id: string;
-  beneficiary_id: string;
-  beneficiary_name: string;
-  beneficiary_phone: string;
-  beneficiary_location: string;
-  programme_id: string;
-  programme_title: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'VERIFIED' | 'FLAGGED' | 'REJECTED';
-  home_visit_conducted: boolean;
-  id_documents_checked: boolean;
-  guardian_contacted: boolean;
-  field_notes?: string;
-  gps_coords?: string;
-  scheduled_for: string;
-}
-
-export interface NotificationItem {
-  id: string;
-  recipient_id: string;
-  title: string;
-  message: string;
-  type: 'OPPORTUNITY' | 'FORM_ASSIGNED' | 'FORM_DEADLINE' | 'APPLICATION_STATUS' | 'CHALLENGE_UPDATE' | 'FOLLOW_UP_SURVEY' | 'SYSTEM';
-  is_read: boolean;
+  organisation: string;
+  programme?: string | null;
+  impact_project?: string | null;
+  kpi?: string | null;
+  metric: string;
+  value: number;
+  period: string;
+  notes?: string;
   created_at: string;
 }
+
+export type ImpactProjectStatus = "PLANNED" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
+
+export interface ImpactProject {
+  id: string;
+  organisation: string;
+  name: string;
+  description?: string;
+  status: ImpactProjectStatus;
+  start_date?: string;
+  end_date?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ReportType = "GENERAL" | "PROGRAMME" | "SURVEY" | "IMPACT" | "KPI" | "PROJECT";
+export type ReportStatus = "GENERATING" | "READY" | "FAILED";
+export type ReportFormat = "PDF" | "EXCEL" | "CSV";
+
+export interface Report {
+  id: string;
+  organisation: string;
+  organisation_name?: string;
+  programme?: string | null;
+  survey?: string | null;
+  impact_project?: string | null;
+  report_type: ReportType;
+  title: string;
+  status: ReportStatus;
+    file_format: ReportFormat;
+  parameters?: Record<string, unknown>;
+  download_url?: string | null;
+  filename?: string;
+  error_message?: string;
+  created_at: string;
+}
+
+export interface KPIProgress {
+  id: string;
+  kpi: string;
+  unit?: string;
+  baseline?: number;
+  current?: number;
+  target?: number;
+  endline?: number;
+  progress_percentage?: number;
+  status: KpiStatus;
+}
+
+export interface BaselineEndline {
+  kpi: string;
+  baseline?: number;
+  endline?: number;
+  change?: number | null;
+  unit?: string;
+}
+
+export interface DashboardResponse {
+  overview: {
+    participants_reached: number;
+    enrolment: number;
+    survey_responses: number;
+    survey_response_rate: number;
+    completion_rate: number;
+    active_programmes: number;
+    active_surveys: number;
+    target_participants: number;
+  };
+  impact: { kpis: KPIProgress[]; baseline_endline: BaselineEndline[] };
+  monitoring: {
+    total_challenges: number;
+    open: number;
+    in_progress: number;
+    resolved: number;
+    resolution_rate: number;
+    challenges_by_category: { category: string; count: number }[];
+  };
+  survey: {
+    published_surveys: number;
+    total_responses: number;
+    responses_per_survey: { survey__title: string; count: number }[];
+  };
+}
+
+export interface PublicQuestion {
+  id: string;
+  question: string;
+  help_text?: string;
+  question_type: QuestionType;
+  options?: string[];
+  required: boolean;
+  order: number;
+  validation_rules?: Record<string, unknown>;
+}
+
+export interface PublicSurvey {
+  id: string;
+  title: string;
+  description?: string;
+  stage: SurveyStage;
+  questions: PublicQuestion[];
+  thank_you_message?: string;
+  accepting_responses: boolean;
+  message?: string;
+}
+
+export interface AuthContextType {
+  user: User | null;
+  role: Role;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  logout: () => void;
+}
+
