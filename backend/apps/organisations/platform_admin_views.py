@@ -1,12 +1,16 @@
 """Platform admin endpoints mounted at /api/admin/."""
+import secrets
+
 from django.contrib.auth import get_user_model
 from django.db.models import Count
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 
 from apps.accounts.serializers import UserSerializer
 from apps.core.permissions import IsPlatformAdmin
+from apps.core.services import audit
 from apps.organisations.serializers import OrganisationSerializer
 
 User = get_user_model()
@@ -40,12 +44,37 @@ def system_overview(request):
     return Response(data)
 
 
-class PlatformOrganisationListView(ListAPIView):
+class PlatformOrganisationListCreateView(ListCreateAPIView):
+    """GET/POST /api/admin/organisations/ — list and create organisations."""
+
     permission_classes = [IsPlatformAdmin]
     serializer_class = OrganisationSerializer
 
     def get_queryset(self):
         return self.request.user.organisations_visible()
+
+    def perform_create(self, serializer):
+        org = serializer.save()
+        audit(self.request.user, "organisation.create", org.name)
+
+
+class PlatformOrganisationDetailView(RetrieveUpdateAPIView):
+    """GET/PATCH /api/admin/organisations/{id}/ — manage one organisation."""
+
+    permission_classes = [IsPlatformAdmin]
+    serializer_class = OrganisationSerializer
+
+    def get_queryset(self):
+        return self.request.user.organisations_visible()
+
+    def perform_update(self, serializer):
+        org = serializer.save()
+        audit(self.request.user, "organisation.update", org.name)
+
+
+class PlatformOrgAdminAccountView(APIView):
+    pass  # replaced below (kept for import safety during edits)
+
 
 
 class PlatformUserListView(ListAPIView):
