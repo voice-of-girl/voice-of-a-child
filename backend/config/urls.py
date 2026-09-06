@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/notifications/', include('apps.notifications.urls')),
     path('api/verification/', include('apps.verification.urls')),
     path('api/analytics/', include('apps.analytics.urls')),
+    path('api/ussd/', include('apps.ussd.urls')),
 ]
