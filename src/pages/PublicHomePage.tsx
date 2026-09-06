@@ -25,7 +25,7 @@ export function PublicHomePage() {
           <nav className="public-nav__links" aria-label="Public navigation">
             <a href="#how-it-works">How it works</a>
             <a href="#features">What we track</a>
-            <Link to="/login">Team sign in <ArrowRight className="h-3.5 w-3.5" /></Link>
+            <Link to="/login" className="public-button public-button--quiet">Team sign in <ArrowRight className="h-3.5 w-3.5" /></Link>
           </nav>
           <Link to="/login" className="public-nav__menu" aria-label="Team sign in"><ArrowRight className="h-5 w-5" /></Link>
         </div>
@@ -45,10 +45,20 @@ export function PublicHomePage() {
           </div>
           <div className="public-hero__visual">
             <div className="public-hero__image-frame">
-              <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=85" alt="Young women learning together" />
+              <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=85" alt="Black Ugandan girls in a rural classroom" />
               <div className="public-hero__caption"><span className="public-status-dot" /> A supported journey, from first contact to measurable change.</div>
             </div>
             <div className="public-hero__note"><ShieldCheck className="h-5 w-5" /><span><strong>Safeguarding first</strong><small>Every record is reviewed by the programme team.</small></span></div>
+          </div>
+        </section>
+
+        <section className="public-section public-section--tinted" id="project-impact">
+          <div className="public-section__heading"><span className="public-kicker">Voice of a Girl — Uganda</span><h2>Real impact in rural communities</h2><p>We work with local organisations across Uganda to reach girls in rural areas with skills, mentorship, and economic opportunities.</p></div>
+          <div className="public-steps">
+            <article className="public-step"><span>12</span><h3>Districts</h3><p>Reaching girls across rural Uganda from West Nile to Karamoja.</p></article>
+            <article className="public-step"><span>6</span><h3>Partner organisations</h3><p>Local NGOs and community-based organisations leading implementation.</p></article>
+            <article className="public-step"><span>2,400+</span><h3>Girls supported</h3><p>Beneficiaries enrolled in skills training and livelihood programmes.</p></article>
+            <article className="public-step"><span>85%</span><h3>Completion rate</h3><p>Girls who complete their programme and transition to work or further study.</p></article>
           </div>
         </section>
 

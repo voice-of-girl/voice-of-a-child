@@ -87,7 +87,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
           <nav className="public-nav__links" aria-label="Public navigation">
             <a href="#how-it-works">How it works</a>
             <a href="#for-organisations">For organisations</a>
-            <button onClick={() => setShowAuthModal('LOGIN')}>Team sign in <ArrowRight className="h-3.5 w-3.5" /></button>
+            <button onClick={() => setShowAuthModal('LOGIN')} className="px-5 py-2.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-sm transition-colors cursor-pointer flex items-center gap-2">Team sign in <ArrowRight className="h-3.5 w-3.5" /></button>
           </nav>
           <button className="public-nav__menu" onClick={() => setShowAuthModal('LOGIN')} aria-label="Open team sign in">
             <Menu className="h-5 w-5" />
@@ -114,8 +114,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp }) => {
               </div>
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-xl">
                 <img
-                  src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=85"
-                  alt="Young women learning together"
+                  src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=85"
+                  alt="Black Ugandan girls in a rural classroom"
                   className="h-72 w-full object-cover sm:h-80"
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent p-5 pt-16 text-white">

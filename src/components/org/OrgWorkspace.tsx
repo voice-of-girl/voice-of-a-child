@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, BarChart3, BriefcaseBusiness, CalendarDays, Check, ChevronRight, Filter, LayoutDashboard, MapPin, Plus, Search, Settings2, Sparkles, Target, TrendingUp, UserPlus, UsersRound, X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, BarChart3, BriefcaseBusiness, CalendarDays, Check, ChevronRight, Filter, LayoutDashboard, LogOut, MapPin, Plus, Search, Settings2, Sparkles, Target, TrendingUp, UserPlus, UsersRound, X } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface OrgWorkspaceProps { initialTab?: string; }
@@ -32,6 +34,8 @@ const tabFromInitial = (initialTab: string): WorkspaceTab => {
 };
 
 export const OrgWorkspace: React.FC<OrgWorkspaceProps> = ({ initialTab = 'overview' }) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<WorkspaceTab>(tabFromInitial(initialTab));
   const [programmes, setProgrammes] = useState(seedProgrammes);
   const [candidates, setCandidates] = useState(seedCandidates);
@@ -70,7 +74,12 @@ export const OrgWorkspace: React.FC<OrgWorkspaceProps> = ({ initialTab = 'overvi
   return <div className="org-workspace" id="org-workspace">
     <aside className="org-workspace__sidebar">
       <div><div className="org-workspace__brand"><span>VG</span><div><strong>Voice of a Girl</strong><small>Organisation workspace</small></div></div><div className="org-workspace__org"><span className="org-workspace__avatar">FA</span><div><strong>FemmeTech Africa</strong><small>Verified organisation</small></div></div><nav className="org-workspace__nav" aria-label="Organisation navigation">{navigation.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => setActiveTab(id)} className={activeTab === id ? 'is-active' : ''}><Icon className="h-4 w-4" />{label}</button>)}</nav></div>
-      <div className="org-workspace__sidebar-foot"><span className="org-workspace__status-dot" /> Demo workspace synced</div>
+      <div className="org-workspace__sidebar-foot">
+        <span className="org-workspace__status-dot" /> Demo workspace synced
+        <button onClick={() => { logout(); navigate('/'); }} className="org-workspace__logout" title="Log out">
+          <LogOut className="h-4 w-4" /> Logout
+        </button>
+      </div>
     </aside>
     <main className="org-workspace__main"><header className="org-workspace__topbar"><div><span className="org-workspace__crumb">Organisation workspace / {navigation.find((item) => item.id === activeTab)?.label}</span><h1>{activeTab === 'dashboard' ? 'Good morning, FemmeTech Africa' : navigation.find((item) => item.id === activeTab)?.label}</h1></div><div className="org-workspace__top-actions"><button className="org-workspace__icon-button" title="Notifications"><span>3</span>•</button><div className="org-workspace__user"><span>FA</span><small>FemmeTech Africa</small></div></div></header>
       {activeTab === 'dashboard' && <DashboardView programmes={programmes} onCreate={() => setShowCreate(true)} onNavigate={setActiveTab} />}
