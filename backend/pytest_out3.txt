@@ -1,0 +1,9 @@
+﻿.........................F.......................................        [100%]
+================================== FAILURES ===================================
+_______________ test_platform_admin_lists_users_filtered_by_org _______________
+tests\test_platform_admin.py:225: in test_platform_admin_lists_users_filtered_by_org
+    assert all(u["organisation"] == str(org_a.id) for u in res.data["results"])
+E   assert False
+E    +  where False = all(<generator object test_platform_admin_lists_users_filtered_by_org.<locals>.<genexpr> at 0x000001A8D78683C0>)
+=========================== short test summary info ===========================
+FAILED tests/test_platform_admin.py::test_platform_admin_lists_users_filtered_by_org

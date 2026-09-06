@@ -1,0 +1,18 @@
+﻿........................FF.......................................        [100%]
+================================== FAILURES ===================================
+______________ test_platform_admin_requires_org_for_tenant_roles ______________
+tests\test_platform_admin.py:207: in test_platform_admin_requires_org_for_tenant_roles
+    assert "organisation" in res.data
+E   assert 'organisation' in {'first_name': [ErrorDetail(string='This field is required.', code='required')], 'last_name': [ErrorDetail(string='This field is required.', code='required')]}
+E    +  where {'first_name': [ErrorDetail(string='This field is required.', code='required')], 'last_name': [ErrorDetail(string='This field is required.', code='required')]} = <Response status_code=400, "application/json">.data
+------------------------------ Captured log call ------------------------------
+WARNING  django.request:log.py:253 Bad Request: /api/admin/users/
+_______________ test_platform_admin_lists_users_filtered_by_org _______________
+tests\test_platform_admin.py:224: in test_platform_admin_lists_users_filtered_by_org
+    assert "listed@orga.test" in emails
+E   AssertionError: assert 'listed@orga.test' in set()
+------------------------------ Captured log call ------------------------------
+WARNING  django.request:log.py:253 Bad Request: /api/admin/users/
+=========================== short test summary info ===========================
+FAILED tests/test_platform_admin.py::test_platform_admin_requires_org_for_tenant_roles
+FAILED tests/test_platform_admin.py::test_platform_admin_lists_users_filtered_by_org
