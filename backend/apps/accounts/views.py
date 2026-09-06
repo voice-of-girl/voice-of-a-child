@@ -15,14 +15,21 @@ from .serializers import (
     PasswordChangeSerializer,
     RegisterUserSerializer,
     UserSerializer,
+    VoiceTokenObtainPairSerializer,
 )
 
 User = get_user_model()
 
 
 class LoginView(TokenObtainPairView):
-    """POST /api/auth/login/ with {email, password}."""
+    """POST /api/auth/login/ with {email, password}.
 
+    Returns ``{access, refresh, user}`` where ``user`` is the serialized
+    caller (role, organisation, etc.) so the frontend can route immediately
+    without an extra ``/auth/me/`` round-trip.
+    """
+
+    serializer_class = VoiceTokenObtainPairSerializer
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "login"
 

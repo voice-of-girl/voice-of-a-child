@@ -1,5 +1,6 @@
 """Serializers for the accounts app."""
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from apps.core.permissions import PLATFORM_ADMIN, ORGANISATION_ADMIN
 from apps.organisations.models import Organisation
@@ -116,3 +117,23 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class PasswordChangeSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True, min_length=8)
+
+
+class VoiceTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """JWT obtain-payload that also returns the authenticated user.
+
+    Returning the user object on login lets the frontend route by role and
+    hydrate its session in a single round-trip.
+    """
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token["name"] = user.full_name
+        token["role"] = user.role
+        return token
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        attrs["user"] = MeSerializer(self.user, context=self.context).data
+        return attrs
